@@ -1,3 +1,4 @@
+Task0:
 To complete the task, you need to create a Python script `seed.py` that sets up a MySQL database (`ALX_prodev`), creates a table (`user_data`) with the specified fields, populates it with data from a `user_data.csv` file, and includes a generator to stream rows from the `user_data` table one by one. The provided `0-main.py` script tests the database setup and data insertion but does not directly test the generator, so we’ll ensure the generator is included to meet the objective.
 
 Below, I’ll provide a complete `seed.py` script that implements all required functions and adds a generator function to stream rows, along with explanations tailored to the task’s requirements.
@@ -255,5 +256,131 @@ Streaming rows:
 ('006bfede-724d-4cdd-a2a6-59700f40d0da', 'Glenda Wisozk', 'Miriam21@gmail.com', 119)
 ...
 ```
+----------------------------
+Task 1
+
+To complete the task, you need to create a Python script named `0-stream_users.py` that contains a function `stream_users()` using a generator to fetch rows one by one from the `user_data` table in the `ALX_prodev` MySQL database. The function must use the Python `yield` keyword and have no more than one loop, as specified. The `1-main.py` script tests this function by printing the first 6 rows using `itertools.islice`, and the output shows each row as a dictionary with keys `user_id`, `name`, `email`, and `age`.
+
+### Task Requirements
+1. **Objective**: Create a generator function `stream_users()` that streams rows from the `user_data` table one by one.
+2. **Script**: Write the function in `0-stream_users.py`.
+3. **Prototype**: `def stream_users()` (no parameters).
+4. **Constraints**:
+   - Use the `yield` keyword to create a generator.
+   - Use no more than one loop in the function.
+5. **Database**: The function should connect to the `ALX_prodev` database and query the `user_data` table, which has fields:
+   - `user_id`: UUID (stored as `CHAR(36)`), Primary Key
+   - `name`: VARCHAR, NOT NULL
+   - `email`: VARCHAR, NOT NULL
+   - `age`: DECIMAL, NOT NULL
+6. **Output Format**: Each row should be yielded as a dictionary with keys `user_id`, `name`, `email`, and `age`, as shown in the `1-main.py` output.
+7. **Dependencies**: Use `mysql.connector` to interact with the MySQL database.
+8. **Assumptions**:
+   - The `ALX_prodev` database and `user_data` table already exist (likely set up by the `seed.py` script from the previous task).
+   - MySQL server is running locally, and credentials (e.g., `root` user, password) are available.
+   - The `user_data` table contains data matching the output format (e.g., UUIDs for `user_id`, strings for `name` and `email`, numbers for `age`).
+
+### Solution: `0-stream_users.py`
+Below is the complete `0-stream_users.py` script that implements the `stream_users()` function to meet the requirements:
+
+```python
+import mysql.connector
+from mysql.connector import Error
+
+def stream_users():
+    """Generator to stream rows from user_data table one by one as dictionaries."""
+    try:
+        # Connect to the ALX_prodev database
+        connection = mysql.connector.connect(
+            host='localhost',
+            user='root',  # Replace with your MySQL user
+            password='',  # Replace with your MySQL password
+            database='ALX_prodev'
+        )
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute("SELECT user_id, name, email, age FROM user_data;")
+            # Single loop to fetch and yield rows
+            while True:
+                row = cursor.fetchone()
+                if row is None:
+                    break
+                # Yield row as a dictionary
+                yield {
+                    'user_id': row[0],
+                    'name': row[1],
+                    'email': row[2],
+                    'age': row[3]
+                }
+    except Error as e:
+        print(f"Error streaming rows: {e}")
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+```
+
+### Explanation of the Script
+1. **Dependencies**:
+   - Uses `mysql.connector` to connect to the MySQL database.
+
+2. **Function: `stream_users()`**:
+   - **Connection**: Connects to the `ALX_prodev` database using `mysql.connector.connect`. Update `user` and `password` to match your MySQL credentials.
+   - **Query**: Executes `SELECT user_id, name, email, age FROM user_data;` to fetch all rows from the `user_data` table.
+   - **Single Loop**: Uses one `while` loop with `cursor.fetchone()` to fetch rows one at a time, satisfying the constraint of no more than one loop.
+   - **Yield**: Converts each row (a tuple) into a dictionary with keys `user_id`, `name`, `email`, and `age`, and yields it.
+   - **Error Handling**: Catches MySQL errors and prints them.
+   - **Cleanup**: Closes the cursor and connection in a `finally` block to free resources.
+
+3. **Output Format**:
+   - Each yielded row is a dictionary, e.g., `{'user_id': '00234e50-...', 'name': 'Dan Altenwerth Jr.', 'email': 'Molly59@gmail.com', 'age': 67}`.
+   - This matches the output shown in `1-main.py`.
+
+4. **Generator Efficiency**:
+   - Uses `fetchone()` to retrieve one row at a time, ensuring memory efficiency for large datasets.
+   - The `yield` keyword makes the function a generator, allowing rows to be processed one by one.
+
+### How It Works with `1-main.py`
+- The `1-main.py` script imports `stream_users` from `0-stream_users.py`.
+- It uses `itertools.islice(stream_users(), 6)` to iterate over the first 6 rows yielded by the generator.
+- Each row is printed as a dictionary, producing output like:
+  ```
+  {'user_id': '00234e50-34eb-4ce2-94ec-26e3fa749796', 'name': 'Dan Altenwerth Jr.', 'email': 'Molly59@gmail.com', 'age': 67}
+  {'user_id': '006bfede-724d-4cdd-a2a6-59700f40d0da', 'name': 'Glenda Wisozk', 'email': 'Miriam21@gmail.com', 'age': 119}
+  ...
+  ```
+
+### Setup Instructions
+1. **Install Dependencies**:
+   - Ensure `mysql-connector-python` is installed:
+     ```bash
+     pip install mysql-connector-python
+     ```
+2. **MySQL Server**:
+   - Ensure the MySQL server is running locally.
+   - Update the `user` and `password` in `stream_users()` to match your MySQL credentials.
+   - The `ALX_prodev` database and `user_data` table must exist with data (likely set up by the `seed.py` script from the previous task).
+3. **File Setup**:
+   - Save the script as `0-stream_users.py` in the same directory as `1-main.py`.
+4. **Run the Test**:
+   - Execute `1-main.py`:
+     ```bash
+     ./1-main.py
+     ```
+   - This should produce the expected output with the first 6 rows as dictionaries.
+
+### Troubleshooting Tips
+- **Connection Errors**: Verify MySQL is running and credentials are correct. Check `host`, `user`, `password`, and ensure the `ALX_prodev` database exists.
+- **Empty Output**: Ensure the `user_data` table has data. You can verify by running a query like `SELECT * FROM user_data LIMIT 5;` in a MySQL client.
+- **Incorrect Output Format**: The function yields dictionaries. If the output isn’t in the expected format, check that the `SELECT` query and dictionary construction match the field names.
+- **Generator Issues**: If no rows are yielded, ensure the `while` loop and `fetchone()` are working correctly, and the table isn’t empty.
+
+### Notes
+- The `stream_users()` function assumes the database and table are already set up, as the task focuses only on streaming rows.
+- The `age` field in the output (e.g., `67`, `119`) is treated as an integer in the dictionaries, but the database stores it as `DECIMAL`. The conversion in the dictionary (`row[3]`) works since MySQL returns numeric values that Python can handle as integers or floats.
+- If you need to integrate this with the `seed.py` script from the previous task, ensure `seed.py` has populated the `user_data` table before running `1-main.py`.
+
+-------------------------------------------------
+Task 2:
 
 If you need help with specific parts (e.g., debugging, CSV format, or MySQL setup), or if you want to see the generator tested in a different way, let me know!
