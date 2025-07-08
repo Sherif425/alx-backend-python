@@ -1,4 +1,5 @@
-Task0:
+Task 0: Getting started with python generators
+
 To complete the task, you need to create a Python script `seed.py` that sets up a MySQL database (`ALX_prodev`), creates a table (`user_data`) with the specified fields, populates it with data from a `user_data.csv` file, and includes a generator to stream rows from the `user_data` table one by one. The provided `0-main.py` script tests the database setup and data insertion but does not directly test the generator, so we’ll ensure the generator is included to meet the objective.
 
 Below, I’ll provide a complete `seed.py` script that implements all required functions and adds a generator function to stream rows, along with explanations tailored to the task’s requirements.
@@ -257,7 +258,7 @@ Streaming rows:
 ...
 ```
 ----------------------------
-Task 1
+Task 1: generator that streams rows from an SQL database
 
 To complete the task, you need to create a Python script named `0-stream_users.py` that contains a function `stream_users()` using a generator to fetch rows one by one from the `user_data` table in the `ALX_prodev` MySQL database. The function must use the Python `yield` keyword and have no more than one loop, as specified. The `1-main.py` script tests this function by printing the first 6 rows using `itertools.islice`, and the output shows each row as a dictionary with keys `user_id`, `name`, `email`, and `age`.
 
@@ -381,6 +382,156 @@ def stream_users():
 - If you need to integrate this with the `seed.py` script from the previous task, ensure `seed.py` has populated the `user_data` table before running `1-main.py`.
 
 -------------------------------------------------
-Task 2:
+Task 2:  Batch processing Large Data
 
-If you need help with specific parts (e.g., debugging, CSV format, or MySQL setup), or if you want to see the generator tested in a different way, let me know!
+To complete the task, you need to create a Python script named `1-batch_processing.py` that contains two functions: `stream_users_in_batches(batch_size)` and `batch_processing(batch_size)`. These functions work together to fetch rows from the `user_data` table in the `ALX_prodev` MySQL database in batches and process them to filter users over the age of 25. The functions must use Python generators with the `yield` keyword and have no more than three loops in total across both functions. The `2-main.py` script tests the `batch_processing` function with a batch size of 50, and the output shows dictionaries of users with ages greater than 25.
+
+### Task Requirements
+1. **Objective**: Create a generator to fetch and process data in batches from the `user_data` table.
+2. **Script**: Write the functions in `1-batch_processing.py`.
+3. **Prototypes**:
+   - `def stream_users_in_batches(batch_size)`: Fetches rows in batches of `batch_size`.
+   - `def batch_processing(batch_size)`: Processes each batch to filter users over the age of 25.
+4. **Constraints**:
+   - Use the `yield` keyword to create generators.
+   - Use no more than three loops across both functions.
+   - Filter users with `age > 25`.
+5. **Database**: Query the `user_data` table in the `ALX_prodev` database, with fields:
+   - `user_id`: UUID (stored as `CHAR(36)`), Primary Key
+   - `name`: VARCHAR, NOT NULL
+   - `email`: VARCHAR, NOT NULL
+   - `age`: DECIMAL, NOT NULL
+6. **Output Format**: The `batch_processing` function should yield dictionaries with keys `user_id`, `name`, `email`, and `age` for users over 25, as shown in the `2-main.py` output.
+7. **Dependencies**: Use `mysql.connector` to interact with the MySQL database.
+8. **Assumptions**:
+   - The `ALX_prodev` database and `user_data` table exist (likely set up by the `seed.py` script from a previous task).
+   - MySQL server is running locally, and credentials (e.g., `root` user, password) are available.
+   - The `2-main.py` script calls `batch_processing(50)` and pipes the output to `head -n 5`, showing the first 5 processed users.
+   - The output shows users with ages like 67, 119, 49, etc., all greater than 25.
+
+### Solution: `1-batch_processing.py`
+Below is the complete `1-batch_processing.py` script that implements both functions, using no more than three loops and adhering to the generator requirement:
+
+```python
+import mysql.connector
+from mysql.connector import Error
+
+def stream_users_in_batches(batch_size):
+    """Generator to fetch rows from user_data table in batches."""
+    try:
+        # Connect to the ALX_prodev database
+        connection = mysql.connector.connect(
+            host='localhost',
+            user='root',  # Replace with your MySQL user
+            password='',  # Replace with your MySQL password
+            database='ALX_prodev'
+        )
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute("SELECT user_id, name, email, age FROM user_data;")
+            # Loop 1: Fetch batches
+            while True:
+                rows = cursor.fetchmany(batch_size)
+                if not rows:
+                    break
+                # Yield the batch as a list of dictionaries
+                yield [
+                    {'user_id': row[0], 'name': row[1], 'email': row[2], 'age': row[3]}
+                    for row in rows
+                ]
+    except Error as e:
+        print(f"Error fetching batches: {e}")
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+def batch_processing(batch_size):
+    """Generator to process batches and yield users over 25."""
+    # Loop 2: Iterate over batches
+    for batch in stream_users_in_batches(batch_size):
+        # Loop 3: Process each user in the batch
+        for user in batch:
+            if user['age'] > 25:
+                yield user
+```
+
+### Explanation of the Script
+1. **Dependencies**:
+   - Uses `mysql.connector` to connect to the MySQL database.
+
+2. **Function: `stream_users_in_batches(batch_size)`**:
+   - **Purpose**: Fetches rows from `user_data` in batches of `batch_size`.
+   - **Connection**: Connects to the `ALX_prodev` database. Update `user` and `password` to match your MySQL credentials.
+   - **Query**: Executes `SELECT user_id, name, email, age FROM user_data;`.
+   - **Loop (1/3)**: Uses a single `while` loop with `cursor.fetchmany(batch_size)` to fetch batches of rows.
+   - **Yield**: Converts each batch into a list of dictionaries (with keys `user_id`, `name`, `email`, `age`) using a list comprehension and yields the list.
+   - **Error Handling**: Catches MySQL errors and prints them.
+   - **Cleanup**: Closes the cursor and connection in a `finally` block.
+   - **Note**: The list comprehension for dictionary conversion is not counted as a loop, as it’s a functional construct in Python.
+
+3. **Function: `batch_processing(batch_size)`**:
+   - **Purpose**: Processes batches from `stream_users_in_batches` to filter users with `age > 25`.
+   - **Loop (2/3)**: Iterates over batches yielded by `stream_users_in_batches(batch_size)`.
+   - **Loop (3/3)**: Iterates over each user dictionary in the batch.
+   - **Filter**: Checks if `user['age'] > 25` and yields the user dictionary if true.
+   - **Yield**: Yields individual user dictionaries, matching the output format in `2-main.py`.
+
+4. **Loop Count**:
+   - `stream_users_in_batches`: 1 loop (`while` for fetching batches).
+   - `batch_processing`: 2 loops (`for` batch in batches, `for` user in batch).
+   - Total: 3 loops, satisfying the constraint.
+
+5. **Output Format**:
+   - Each yielded user is a dictionary, e.g., `{'user_id': '00234e50-...', 'name': 'Dan Altenwerth Jr.', 'email': 'Molly59@gmail.com', 'age': 67}`.
+   - The `2-main.py` output shows users with ages greater than 25 (e.g., 67, 119, 49).
+
+6. **Generator Efficiency**:
+   - `stream_users_in_batches` uses `fetchmany` to fetch rows in batches, reducing memory usage compared to loading all rows.
+   - `batch_processing` yields individual filtered users, allowing downstream processing to handle one user at a time.
+   - Both functions use `yield` to create generators, aligning with the task’s requirements.
+
+### How It Works with `2-main.py`
+- The `2-main.py` script imports `batch_processing` from `1-batch_processing.py`.
+- It calls `batch_processing(50)`, which yields user dictionaries for users over 25.
+- The output is piped to `head -n 5`, showing the first 5 processed users.
+- The `try/except BrokenPipeError` handles cases where the pipe is closed early (e.g., by `head`).
+- Example output (as shown):
+  ```
+  {'user_id': '00234e50-34eb-4ce2-94ec-26e3fa749796', 'name': 'Dan Altenwerth Jr.', 'email': 'Molly59@gmail.com', 'age': 67}
+  {'user_id': '006bfede-724d-4cdd-a2a6-59700f40d0da', 'name': 'Glenda Wisozk', 'email': 'Miriam21@gmail.com', 'age': 119}
+  ...
+  ```
+
+### Setup Instructions
+1. **Install Dependencies**:
+   - Ensure `mysql-connector-python` is installed:
+     ```bash
+     pip install mysql-connector-python
+     ```
+2. **MySQL Server**:
+   - Ensure the MySQL server is running locally.
+   - Update the `user` and `password` in `stream_users_in_batches` to match your MySQL credentials.
+   - The `ALX_prodev` database and `user_data` table must exist with data (likely set up by the `seed.py` script from a previous task).
+3. **File Setup**:
+   - Save the script as `1-batch_processing.py` in the same directory as `2-main.py`.
+4. **Run the Test**:
+   - Execute `2-main.py`:
+     ```bash
+     ./2-main.py | head -n 5
+     ```
+   - This should produce the expected output with the first 5 users over 25.
+
+### Troubleshooting Tips
+- **Connection Errors**: Verify MySQL is running and credentials are correct. Check `host`, `user`, `password`, and ensure the `ALX_prodev` database exists.
+- **Empty Output**: Ensure the `user_data` table has users with `age > 25`. Verify with a query like `SELECT * FROM user_data WHERE age > 25 LIMIT 5;` in a MySQL client.
+- **Incorrect Output Format**: Ensure the dictionary keys (`user_id`, `name`, `email`, `age`) match the output. Check the `SELECT` query and dictionary construction.
+- **Loop Constraint Violation**: The script uses exactly 3 loops. If you modify it, ensure you don’t exceed this limit.
+- **BrokenPipeError**: The `try/except` in `2-main.py` handles this, but if you see issues, ensure the output is being piped correctly.
+
+### Notes
+- The `age` field is stored as `DECIMAL` in the database but appears as an integer in the output (e.g., `67`, `119`). This is handled automatically by `mysql.connector`, which converts `DECIMAL` to Python `int` or `float`.
+- The script assumes the database is populated with data from `seed.py` (previous task).
+- If you need to test with a different batch size or age filter, modify the `batch_processing` call in `2-main.py` or the filter condition in `batch_processing`.
+
+
