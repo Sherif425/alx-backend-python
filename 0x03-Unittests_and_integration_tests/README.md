@@ -146,7 +146,7 @@ This confirms that `access_nested_map` works as expected for all test cases.
   - 
 
   -------------------------------------------------------------------
-  Task 0
+  ### Task 0
 
   I'll create a unit test method `test_access_nested_map_exception` for the `access_nested_map` function in `utils.py`, using the `assertRaises` context manager to verify that a `KeyError` is raised for the specified inputs. The test will use `@parameterized.expand` to handle the two test cases, ensure the exception message matches the expected key, and adhere to the provided requirements (PEP 8, documentation, type annotations, etc.). Since this is an extension of the previous test file, I'll update `test_utils.py` to include the new test method while keeping the existing tests intact.
 
@@ -273,9 +273,8 @@ This confirms that both `test_access_nested_map` (3 tests) and `test_access_nest
 - The `str(cm.exception)` check ensures the exception message matches the expected key (e.g., `'a'` or `'b'`), as `KeyError` in Python includes the missing key in its message.
 - The `@parameterized.expand` decorator efficiently handles multiple test cases, keeping the test method concise.
 
-If you have more tasks or need further clarification, let me know!
 =========================================================================================
-Task 1:
+### Task 1:
 
 It appears you've requested the implementation of `TestAccessNestedMap.test_access_nested_map_exception` again, which was already provided in the previous response. The task asks for a unit test method to verify that the `access_nested_map` function from `utils.py` raises a `KeyError` for the specified inputs, using `@parameterized.expand` and the `assertRaises` context manager, while ensuring the exception message matches the expected key. Since the previous response already addressed this exact task, I'll confirm the requirements and provide the same solution for clarity, ensuring it aligns with the project requirements (Python 3.7, Ubuntu 18.04 LTS, PEP 8, documentation, type annotations, etc.). If you meant a different task or need additional modifications, please clarify.
 
@@ -389,7 +388,7 @@ This confirms the tests pass, including the two new cases for `test_access_neste
 
   -----------------------------------------------------------------------------------
 
-  Task 2
+ ### Task 2
 
   I'll create a unit test for the `get_json` function from `utils.py`, which retrieves JSON data from a given URL. The task requires defining a `TestGetJson` class that inherits from `unittest.TestCase` and implementing a `test_get_json` method to verify that `get_json` returns the expected payload. To avoid making actual HTTP calls, I'll use `unittest.mock.patch` to mock the `requests.get` function, ensuring it returns a `Mock` object with a `json` method that returns the provided `test_payload`. The test will use `@parameterized.expand` to test two input cases, verify that `requests.get` is called exactly once per test with the correct URL, and check that the output matches the `test_payload`. The code will adhere to the project requirements (Python 3.7, Ubuntu 18.04 LTS, PEP 8, documentation, type annotations, etc.).
 
