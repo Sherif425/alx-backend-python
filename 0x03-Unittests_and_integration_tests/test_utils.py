@@ -6,6 +6,7 @@ from parameterized import parameterized
 from typing import Mapping, Sequence, Any, Dict
 from utils import access_nested_map, get_json, memoize
 
+
 class TestAccessNestedMap(unittest.TestCase):
     """Test case for access_nested_map function."""
     
@@ -14,8 +15,10 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2),
     ])
-    def test_access_nested_map(self, nested_map: Mapping, path: Sequence, expected: Any) -> None:
-        """Test access_nested_map returns expected value for given nested map and path."""
+    def test_access_nested_map(self, nested_map: Mapping, path: Sequence,
+                              expected: Any) -> None:
+        """Test access_nested_map returns expected value for given nested map
+        and path."""
         result = access_nested_map(nested_map, path)
         self.assertEqual(result, expected)
 
@@ -23,11 +26,14 @@ class TestAccessNestedMap(unittest.TestCase):
         ({}, ("a",), "a"),
         ({"a": 1}, ("a", "b"), "b"),
     ])
-    def test_access_nested_map_exception(self, nested_map: Mapping, path: Sequence, expected_key: str) -> None:
-        """Test access_nested_map raises KeyError for invalid paths with correct key."""
+    def test_access_nested_map_exception(self, nested_map: Mapping,
+                                        path: Sequence, expected_key: str) -> None:
+        """Test access_nested_map raises KeyError for invalid paths with
+        correct key."""
         with self.assertRaises(KeyError) as cm:
             access_nested_map(nested_map, path)
         self.assertEqual(str(cm.exception), f"'{expected_key}'")
+
 
 class TestGetJson(unittest.TestCase):
     """Test case for get_json function."""
@@ -44,6 +50,7 @@ class TestGetJson(unittest.TestCase):
             result = get_json(test_url)
             mock_get.assert_called_once_with(test_url)
             self.assertEqual(result, test_payload)
+
 
 class TestMemoize(unittest.TestCase):
     """Test case for memoize decorator."""
@@ -65,6 +72,7 @@ class TestMemoize(unittest.TestCase):
             mock_method.assert_called_once()
             self.assertEqual(result1, 42)
             self.assertEqual(result2, 42)
+
 
 if __name__ == "__main__":
     unittest.main()
