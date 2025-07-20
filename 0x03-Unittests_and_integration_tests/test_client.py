@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import patch, PropertyMock
 from parameterized import parameterized
-from typing import Dict, List
+from typing import Dict, List, Any
 from client import GithubOrgClient
 
 
