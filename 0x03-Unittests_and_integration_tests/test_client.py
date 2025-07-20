@@ -49,7 +49,7 @@ class TestGithubOrgClient(unittest.TestCase):
             client = GithubOrgClient("test_org")
             result = client.public_repos()
             mock_get_json.assert_called_once_with(test_url)
-            mock_public_repos_url.fget.assert_called_once()
+            mock_public_repos_url.assert_called_once()
             self.assertEqual(result, ["repo1", "repo2"])
 
 
