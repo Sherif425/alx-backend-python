@@ -65,14 +65,24 @@ class TestGithubOrgClient(unittest.TestCase):
 
 @parameterized_class([
     {
-        "org_name": "test_org",
-        "org_payload": {"repos_url": "https://api.github.com/orgs/test_org/repos"},
+        "org_name": "google",
+        "org_payload": {"repos_url": "https://api.github.com/orgs/google/repos"},
         "repos_payload": [
-            {"name": "repo1", "license": {"key": "mit"}},
-            {"name": "repo2", "license": {"key": "apache-2.0"}}
+            {"name": "g_repo1", "license": {"key": "mit"}},
+            {"name": "g_repo2", "license": {"key": "apache-2.0"}}
         ],
-        "expected_repos": ["repo1", "repo2"],
-        "apache2_repos": ["repo2"]
+        "expected_repos": ["g_repo1", "g_repo2"],
+        "apache2_repos": ["g_repo2"]
+    },
+    {
+        "org_name": "abc",
+        "org_payload": {"repos_url": "https://api.github.com/orgs/abc/repos"},
+        "repos_payload": [
+            {"name": "a_repo1", "license": {"key": "bsd"}},
+            {"name": "a_repo2", "license": {"key": "apache-2.0"}}
+        ],
+        "expected_repos": ["a_repo1", "a_repo2"],
+        "apache2_repos": ["a_repo2"]
     }
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
@@ -106,12 +116,16 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         client = GithubOrgClient(self.org_name)
         result = client.public_repos()
         self.assertEqual(result, self.expected_repos)
+        self.mock_get.assert_any_call(f"https://api.github.com/orgs/{self.org_name}")
+        self.mock_get.assert_any_call(self.org_payload["repos_url"])
 
     def test_public_repos_with_license(self) -> None:
         """Test GithubOrgClient.public_repos with apache-2.0 license."""
         client = GithubOrgClient(self.org_name)
         result = client.public_repos(license="apache-2.0")
         self.assertEqual(result, self.apache2_repos)
+        self.mock_get.assert_any_call(f"https://api.github.com/orgs/{self.org_name}")
+        self.mock_get.assert_any_call(self.org_payload["repos_url"])
 
 
 if __name__ == "__main__":
