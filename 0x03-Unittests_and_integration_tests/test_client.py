@@ -200,12 +200,14 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             class MockResponse:
                 def __init__(self, json_data: Dict):
                     self.json_data = json_data
+
                 def json(self) -> Dict:
                     return self.json_data
 
             if url == cls.org_payload["repos_url"]:
                 return MockResponse(cls.repos_payload)
-            if url == f"https://api.github.com/orgs/{cls.org_name}":
+            org_url = f"https://api.github.com/orgs/{cls.org_name}"
+            if url == org_url:
                 return MockResponse(cls.org_payload)
             return MockResponse({})
 
@@ -221,8 +223,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         client = GithubOrgClient(self.org_name)
         result = client.public_repos()
         self.assertEqual(result, self.expected_repos)
-        self.mock_get.assert_any_call(
-            f"https://api.github.com/orgs/{self.org_name}")
+        org_url = f"https://api.github.com/orgs/{self.org_name}"
+        self.mock_get.assert_any_call(org_url)
         self.mock_get.assert_any_call(self.org_payload["repos_url"])
 
     def test_public_repos_with_license(self) -> None:
@@ -237,8 +239,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             client = GithubOrgClient(self.org_name)
             result = client.public_repos(license="apache-2.0")
             self.assertEqual(result, self.apache2_repos)
-            self.mock_get.assert_any_call(
-                f"https://api.github.com/orgs/{self.org_name}")
+            org_url = f"https://api.github.com/orgs/{self.org_name}"
+            self.mock_get.assert_any_call(org_url)
             self.mock_get.assert_any_call(self.org_payload["repos_url"])
 
 
