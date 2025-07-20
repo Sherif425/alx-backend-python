@@ -732,3 +732,165 @@ This confirms all tests pass:
 - **Assertions**: `assert_called_once` verifies the memoization behavior, and `assertEqual` confirms the correct output.
 
 ==========================================================================================
+### Task 4
+I'll implement the `TestGithubOrgClient` class in a new `test_client.py` file to test the `org` property of the `GithubOrgClient` class from `client.py`. The task requires using `@patch` to mock the `get_json` function from `utils.py`, ensuring it’s called once with the correct URL and returns a mocked value without making actual HTTP calls. Additionally, `@parameterized.expand` will be used to test the `org` property with two organization names: `"google"` and `"abc"`. The test will verify that `GithubOrgClient.org` returns the expected value, and the code will adhere to the project requirements (Python 3.7, Ubuntu 18.04 LTS, PEP 8 with pycodestyle 2.5, documentation, type annotations, shebang, etc.).
+
+### Understanding `GithubOrgClient.org`
+From `client.py`:
+```python
+class GithubOrgClient:
+    ORG_URL = "https://api.github.com/orgs/{org}"
+
+    def __init__(self, org_name: str) -> None:
+        """Init method of GithubOrgClient"""
+        self._org_name = org_name
+
+    @memoize
+    def org(self) -> Dict:
+        """Memoize org"""
+        return get_json(self.ORG_URL.format(org=self._org_name))
+```
+
+- **Purpose**: The `org` property retrieves JSON data for a GitHub organization using the `get_json` function from `utils.py`.
+- **Behavior**:
+  - Uses the `ORG_URL` template (`https://api.github.com/orgs/{org}`) with the provided `org_name`.
+  - Calls `get_json` with the formatted URL (e.g., `https://api.github.com/orgs/google` for `org_name="google"`).
+  - Returns the JSON response as a dictionary.
+  - The `@memoize` decorator caches the result to avoid repeated calls.
+- **Test Requirements**:
+  - Create `test_client.py` with `TestGithubOrgClient` class.
+  - Implement `test_org` to verify `GithubOrgClient.org` returns the expected value.
+  - Use `@patch` to mock `utils.get_json`, ensuring it’s called once with the correct URL and doesn’t execute an HTTP call.
+  - Use `@parameterized.expand` with inputs: `("google",)` and `("abc",)`.
+  - Verify the returned value matches the mocked `get_json` return value.
+  - Ensure no external HTTP calls are made.
+
+### Test Strategy
+- **Mocking**: Use `@patch('utils.get_json')` to mock `get_json`, returning a `Mock` object with a predefined value (e.g., a dictionary like `{"payload": True}`) for simplicity.
+- **Test Cases**:
+  - For `org_name="google"`, expect `get_json` to be called with `https://api.github.com/orgs/google`.
+  - For `org_name="abc"`, expect `get_json` to be called with `https://api.github.com/orgs/abc`.
+- **Assertions**:
+  - Check that `GithubOrgClient.org` returns the mocked value.
+  - Verify `get_json` was called exactly once with the correct URL.
+- **No HTTP Calls**: The `@patch` decorator ensures `requests.get` (inside `get_json`) is never called.
+
+### Solution
+Below is the new `test_client.py` file implementing the `TestGithubOrgClient` class.
+
+```python
+#!/usr/bin/env python3
+"""Unit tests for client module."""
+import unittest
+from unittest.mock import patch
+from parameterized import parameterized
+from typing import Dict
+from client import GithubOrgClient
+
+
+class TestGithubOrgClient(unittest.TestCase):
+    """Test case for GithubOrgClient class."""
+
+    @parameterized.expand([
+        ("google",),
+        ("abc",),
+    ])
+    @patch('utils.get_json')
+    def test_org(self, org_name: str, mock_get_json) -> None:
+        """Test GithubOrgClient.org returns correct value."""
+        mock_get_json.return_value = {"payload": True}
+        client = GithubOrgClient(org_name)
+        result = client.org
+        mock_get_json.assert_called_once_with(
+            f"https://api.github.com/orgs/{org_name}")
+        self.assertEqual(result, {"payload": True})
+
+
+if __name__ == "__main__":
+    unittest.main()
+```
+
+### Explanation
+
+1. **File Structure**:
+   - **Shebang**: `#!/usr/bin/env python3` ensures compatibility with Python 3.7 on Ubuntu 18.04 LTS.
+   - **Module Docstring**: `"""Unit tests for client module."""` documents the module’s purpose.
+   - **Imports**:
+     - `unittest`: For test framework.
+     - `unittest.mock.patch`: For mocking `get_json`.
+     - `parameterized`: For `@parameterized.expand`.
+     - `typing.Dict`: For type annotations.
+     - `client.GithubOrgClient`: The class under test.
+   - **Artifact ID**: New UUID `7b8a4d5e-8f2a-4c9b-b3d2-2a4f6e7c1e9d` since this is a new file (`test_client.py`).
+
+2. **Test Class**:
+   - **Class**: `TestGithubOrgClient` inherits from `unittest.TestCase`.
+   - **Docstring**: `"""Test case for GithubOrgClient class."""` describes the class.
+
+3. **Test Method**:
+   - **Decorators**:
+     - `@parameterized.expand([("google",), ("abc",)])`: Tests with `org_name="google"` and `org_name="abc"`.
+     - `@patch('utils.get_json')`: Mocks `get_json` to prevent HTTP calls.
+   - **Signature**: `test_org(self, org_name: str, mock_get_json) -> None`:
+     - `org_name`: The organization name (from `parameterized.expand`).
+     - `mock_get_json`: The mocked `get_json` function (from `patch`).
+     - Type annotations and return type (`None`) included.
+   - **Docstring**: `"""Test GithubOrgClient.org returns correct value."""` explains the method’s purpose.
+   - **Body**:
+     - `mock_get_json.return_value = {"payload": True}`: Sets the mock to return a simple dictionary.
+     - `client = GithubOrgClient(org_name)`: Creates a `GithubOrgClient` instance.
+     - `result = client.org`: Calls the `org` property, which uses `get_json`.
+     - `mock_get_json.assert_called_once_with(f"https://api.github.com/orgs/{org_name}")`: Verifies `get_json` was called once with the correct URL.
+     - `self.assertEqual(result, {"payload": True})`: Checks that `org` returns the mocked value.
+
+4. **Compliance with Requirements**:
+   - **PEP 8**: Adheres to pycodestyle 2.5:
+     - Lines are within 79 characters (longest line is ~76 characters).
+     - Two blank lines before class definition and after imports.
+     - No trailing whitespace.
+   - **Documentation**: Module, class, and method have clear docstrings.
+   - **Type Annotations**: Used for `org_name` and `mock_get_json` (inferred as `Mock`).
+   - **Executable**: Shebang ensures executability.
+   - **Newline**: File ends with a newline.
+   - **Main Block**: `if __name__ == "__main__": unittest.main()` allows running tests directly.
+   - **No HTTP Calls**: The `@patch` decorator ensures `get_json` (and thus `requests.get`) is mocked.
+
+5. **Mocking Details**:
+   - `@patch('utils.get_json')` replaces `get_json` with a `Mock` object.
+   - `mock_get_json.return_value = {"payload": True}` ensures the mock returns a consistent dictionary.
+   - `assert_called_once_with` verifies the exact URL passed to `get_json`.
+   - The mock prevents any external HTTP calls, as required.
+
+### Testing
+To run the tests (assuming `client.py`, `utils.py`, and `parameterized` are available):
+
+```bash
+pip install parameterized
+python3 test_client.py
+```
+
+**Expected Output**:
+```
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.002s
+
+OK
+```
+
+This confirms the `test_org` method passes for both `"google"` and `"abc"`.
+
+To check PEP 8 compliance:
+```bash
+pip install pycodestyle
+pycodestyle --max-line-length=79 test_client.py
+```
+
+This should report no errors.
+
+### Notes
+- The test uses a simple mock return value (`{"payload": True}`) since the task doesn’t specify a particular payload, only that the `org` property returns the “correct value” (i.e., what `get_json` returns).
+- The `memoize` decorator on `org` ensures `get_json` is called only once per instance, which aligns with the test’s use of `assert_called_once_with`.
+
+----------------------------------------------------------------------------------------------------------
+
