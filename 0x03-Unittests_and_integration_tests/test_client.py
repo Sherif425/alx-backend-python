@@ -194,17 +194,21 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         """Set up class by mocking requests.get with fixture payloads."""
         cls.get_patcher = patch('requests.get')
         cls.mock_get = cls.get_patcher.start()
+
         def side_effect(url: str) -> Any:
+
             class MockResponse:
                 def __init__(self, json_data: Dict):
                     self.json_data = json_data
                 def json(self) -> Dict:
                     return self.json_data
+
             if url == cls.org_payload["repos_url"]:
                 return MockResponse(cls.repos_payload)
             if url == f"https://api.github.com/orgs/{cls.org_name}":
                 return MockResponse(cls.org_payload)
             return MockResponse({})
+
         cls.mock_get.side_effect = side_effect
 
     @classmethod
@@ -217,7 +221,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         client = GithubOrgClient(self.org_name)
         result = client.public_repos()
         self.assertEqual(result, self.expected_repos)
-        self.mock_get.assert_any_call(f"https://api.github.com/orgs/{self.org_name}")
+        self.mock_get.assert_any_call(
+            f"https://api.github.com/orgs/{self.org_name}")
         self.mock_get.assert_any_call(self.org_payload["repos_url"])
 
     def test_public_repos_with_license(self) -> None:
@@ -232,7 +237,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             client = GithubOrgClient(self.org_name)
             result = client.public_repos(license="apache-2.0")
             self.assertEqual(result, self.apache2_repos)
-            self.mock_get.assert_any_call(f"https://api.github.com/orgs/{self.org_name}")
+            self.mock_get.assert_any_call(
+                f"https://api.github.com/orgs/{self.org_name}")
             self.mock_get.assert_any_call(self.org_payload["repos_url"])
 
 
