@@ -15,8 +15,8 @@ from pathlib import Path
 env = environ.Env()
 environ.Env.read_env()
 
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env.bool('DEBUG', default=False)
+# SECRET_KEY = env('SECRET_KEY')
+# DEBUG = env.bool('DEBUG', default=False)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-m(e(afxvepyg37y!_vh$a57v8wg09%xkpt^y6@zicaeot4iv8s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = []
 
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'chats',
+    'rest_framework_simplejwt', 
 ]
 
 MIDDLEWARE = [
