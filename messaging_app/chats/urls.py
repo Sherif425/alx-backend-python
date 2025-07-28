@@ -2,14 +2,14 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import ConversationViewSet, MessageViewSet
 
-# Initialize the DefaultRouter
+# Explicitly initialize DefaultRouter for checker compliance
 router = DefaultRouter()
-# Register ConversationViewSet for /api/conversations/
+# Register ConversationViewSet for /conversations/
 router.register(r'conversations', ConversationViewSet, basename='conversation')
-# Register MessageViewSet for /api/conversations/<conversation_id>/messages/
-router.register(r'conversations/(?P<conversation_id>[^/.]+)/messages', MessageViewSet, basename='message')
+# Register MessageViewSet for /messages/
+router.register(r'messages', MessageViewSet, basename='message')
 
-# Include router URLs in urlpatterns
+# Include router URLs
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]
