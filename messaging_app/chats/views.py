@@ -1,4 +1,6 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from django.db.models import Q
@@ -9,6 +11,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     serializer_class = ConversationSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['created_at']  # Allow filtering by creation date
 
     def get_queryset(self):
         """
@@ -23,6 +27,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
         """
         conversation = serializer.save()
         conversation.participants.add(self.request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class MessageViewSet(viewsets.ModelViewSet):
     """
@@ -30,6 +35,8 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['sent_at', 'sender']  # Allow filtering by sent_at and sender
 
     def get_queryset(self):
         """
@@ -51,3 +58,4 @@ class MessageViewSet(viewsets.ModelViewSet):
         conversation_id = self.kwargs.get('conversation_id')
         conversation = Conversation.objects.get(conversation_id=conversation_id)
         serializer.save(sender=self.request.user, conversation=conversation)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
