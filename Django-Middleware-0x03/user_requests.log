@@ -152,3 +152,15 @@ django.db.utils.OperationalError: no such column: chats_user.user_id
 2025-08-06 08:35:36.423642 - User: sherif425@gmail.com - Path: /admin/jsi18n/
 2025-08-06 08:35:37.742919 - User: sherif425@gmail.com - Path: /admin/chats/conversation/
 2025-08-06 08:35:37.820031 - User: sherif425@gmail.com - Path: /admin/jsi18n/
+2025-08-06 08:53:26.412617 - User: sherif425@gmail.com - Path: /admin/chats/conversation/
+Forbidden: /admin/chats/conversation/
+2025-08-06 08:53:31.493886 - User: sherif425@gmail.com - Path: /admin/
+Forbidden: /admin/
+2025-08-06 08:53:31.847009 - User: sherif425@gmail.com - Path: /admin/
+Forbidden: /admin/
+/home/sherif/alx-backend-python/Django-Middleware-0x03/chats/middleware.py changed, reloading.
+/home/sherif/alx-backend-python/Django-Middleware-0x03/chats/middleware.py changed, reloading.
+2025-08-06 08:59:26.935270 - User: sherif425@gmail.com - Path: /admin/
+Forbidden: /admin/
+2025-08-06 08:59:56.918953 - User: Anonymous - Path: /chats/send/
+Forbidden: /chats/send/
