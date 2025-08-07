@@ -7,6 +7,13 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
+    edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='edited_messages',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    ) 
 
     def __str__(self):
         return f'Message from {self.sender} to {self.receiver}'
