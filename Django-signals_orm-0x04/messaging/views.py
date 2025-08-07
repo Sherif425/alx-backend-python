@@ -82,3 +82,16 @@ def unread_messages_view(request):
     return Response(serializer.data)
 
 
+
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView
+from .models import Message
+
+# If you're using class-based views (CBV)
+@method_decorator(cache_page(60), name='dispatch')
+class MessageListView(ListView):
+    model = Message
+    template_name = 'messaging/message_list.html'
+    context_object_name = 'messages'
+
