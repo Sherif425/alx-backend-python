@@ -49,3 +49,19 @@ def get_user_conversations(user):
         .order_by('-timestamp')
     )
     return root_messages
+
+
+# messaging/views.py
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .models import Message
+from .serializers import MessageSerializer
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def unread_messages(request):
+    messages = Message.unread.for_user(request.user)
+    serializer = MessageSerializer(messages, many=True)
+    return Response(serializer.data)

@@ -1,5 +1,13 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
+
+class UnreadMessagesManager(models.Manager):
+    def for_user(self, user):
+        return self.get_queryset().filter(receiver=user, read=False).only("id", "sender", "content", "timestamp")
 
 class Message(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
@@ -14,7 +22,7 @@ class Message(models.Model):
         null=True,
         blank=True
     ) 
-    
+    read = models.BooleanField(default=False)  # <-- NEW FIELD
     parent_message = models.ForeignKey(
         'self',
         null=True,
@@ -23,8 +31,11 @@ class Message(models.Model):
         on_delete=models.CASCADE
     )
 
-    def __str__(self):
-        return f"{self.sender} -> {self.receiver}: {self.content[:30]}"
+    objects = models.Manager()  # Default manager
+    unread = UnreadMessagesManager()  # Custom manager
+
+    # def __str__(self):
+    #     return f"{self.sender} -> {self.receiver}: {self.content[:30]}"
 
     def __str__(self):
         return f'Message from {self.sender} to {self.receiver}'
@@ -46,3 +57,6 @@ class MessageHistory(models.Model):
 
     def __str__(self):
         return f'History for Message {self.message.id} at {self.edited_at}'
+    
+
+
