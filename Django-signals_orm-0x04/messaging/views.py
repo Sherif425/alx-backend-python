@@ -59,10 +59,25 @@ from rest_framework.response import Response
 from .models import Message
 from .serializers import MessageSerializer
 
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def unread_messages_view(request):
+#     unread_messages = Message.unread.unread_for_user(request.user)
+#     serializer = MessageSerializer(unread_messages, many=True)
+#     return Response(serializer.data)
+
+# from rest_framework.decorators import api_view, permission_classes
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.response import Response
+# from .models import Message
+# from .serializers import MessageSerializer
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def unread_messages_view(request):
-    unread_messages = Message.unread.unread_for_user(request.user)
+    # Fetch unread messages and use `.only()` here explicitly
+    unread_messages = Message.unread.unread_for_user(request.user).only('id', 'sender', 'content', 'timestamp')
+    
     serializer = MessageSerializer(unread_messages, many=True)
     return Response(serializer.data)
 
