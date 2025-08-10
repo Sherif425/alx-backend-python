@@ -15,7 +15,8 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - db_data:/var/lib/mysql
+      # Named volume for persistent storage
+      - mysql_data:/var/lib/mysql
 
   web:
     build: .
@@ -30,5 +31,6 @@ services:
     volumes:
       - .:/app
 
+# Define named volume outside services
 volumes:
-  db_data:
+  mysql_data:
