@@ -1,22 +1,27 @@
-# 1. Use Python 3.10 base image
+# Use official Python image
 FROM python:3.10
 
-# 2. Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Set environment variables to prevent Python from writing pyc files & enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# 3. Set work directory inside container
+# Set working directory inside container
 WORKDIR /app
 
-# 4. Install dependencies
-COPY requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Install system dependencies (optional: psycopg2, MySQL client, etc.)
+RUN apt-get update && apt-get install -y \
+    libpq-dev gcc && \
+    rm -rf /var/lib/apt/lists/*
 
-# 5. Copy project files into container
+# Install Python dependencies
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project files into container
 COPY . /app/
 
-# 6. Expose Django's default port
+# Expose Django's default port
 EXPOSE 8000
 
-# 7. Run Django development server
+# Start the Django app
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
