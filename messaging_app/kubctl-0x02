@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Deploy blue version (existing stable)
+echo "Deploying BLUE version..."
+kubectl apply -f blue_deployment.yaml
+
+# Deploy green version (new release)
+echo "Deploying GREEN version..."
+kubectl apply -f green_deployment.yaml
+
+# Check logs for green deployment
+GREEN_POD=$(kubectl get pods -l app=django,version=green -o jsonpath="{.items[0].metadata.name}")
+echo "Checking logs for GREEN pod: $GREEN_POD"
+kubectl logs "$GREEN_POD" --tail=50
+
+read -p "Switch traffic to GREEN version? (y/n): " confirm
+if [[ "$confirm" == "y" ]]; then
+    echo "Switching Service to GREEN..."
+    kubectl patch service django-service -p '{"spec":{"selector":{"app":"django","version":"green"}}}'
+    echo "Traffic switched to GREEN version!"
+else
+    echo "Keeping BLUE version active."
+fi
