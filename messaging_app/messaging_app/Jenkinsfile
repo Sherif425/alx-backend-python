@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        DOCKER_HUB_REPO = 'your-dockerhub-username/messaging-app'
+        DOCKER_HUB_REPO = 'sherif425/messaging-app'
     }
 
     stages {
@@ -15,10 +15,9 @@ pipeline {
             steps {
                 git(
                     branch: 'main',
-                    url: 'https://github.com/<your-username>/alx-backend-python.git',
+                    url: 'https://github.com/<your-github-username>/alx-backend-python.git',
                     credentialsId: 'github-credentials'
                 )
-                // Explicit command for autochecker
                 sh 'echo "git branch: $(git rev-parse --abbrev-ref HEAD)"'
             }
         }
